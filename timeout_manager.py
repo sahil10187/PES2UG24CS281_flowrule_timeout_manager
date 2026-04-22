@@ -26,23 +26,33 @@ class FinalController(object):
         log.info("Table-miss rule installed")  
         # print log
 
-    def _handle_PacketIn(self, event):
-    packet = event.parsed
-    in_port = event.port
+    def _handle_PacketIn(self, event):  
+    # triggered when packet comes to controller
+        packet = event.parsed  
+        # parsed packet (not used much here, but needed usually)
+        in_port = event.port  
+        # port from which packet came
 
-    if in_port == 2 and not self.blocked_once:
-        log.info("BLOCKING h2 TRAFFIC")
-
-        msg = of.ofp_flow_mod()
-        msg.priority = 10
-        msg.match.in_port = 2
-        msg.hard_timeout = 10
-
-        # no actions → DROP
-        event.connection.send(msg)
-
-        self.blocked_once = True
-        return
+        if in_port == 2 and not self.blocked_once:  
+        # if packet is from port 2 (h2) AND we haven’t blocked before
+            log.info("BLOCKING h2 TRAFFIC")  
+            # print blocking message
+            msg = of.ofp_flow_mod()  
+            # create new flow rule
+            msg.priority = 10  
+            # higher priority than table-miss
+            msg.match.in_port = 2  
+            # match packets coming from port 2 (h2)
+            msg.hard_timeout = 10  
+            # rule expires after 10 seconds
+            # no actions → means DROP rule  
+            # (important: empty actions list = drop traffic)
+            event.connection.send(msg)  
+            # send drop rule to switch
+            self.blocked_once = True  
+            # ensure blocking happens only once
+            return  
+            # stop further processing
 
         msg = of.ofp_packet_out()  
         # create packet out message
@@ -54,9 +64,10 @@ class FinalController(object):
         # send packet to switch
 
     def _handle_FlowRemoved(self, event):  
-    # triggered when flow expires (if supported)
+    # triggered when flow expires 
         log.info("FLOW EXPIRED")  
         # print expiration message
+
 
 def launch():  
 # starting point of POX controller
