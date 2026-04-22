@@ -32,7 +32,7 @@ class FinalController(object):
         # parsed packet (not used much here, but needed usually)
         in_port = event.port  
         # port from which packet came
-        if in_port == 1 and not self.blocked_once:  
+        if in_port == 2 and not self.blocked_once:  
         # if packet is from port 1 AND we haven’t blocked before
             log.info("BLOCKING h1 TRAFFIC")  
             # print blocking message
